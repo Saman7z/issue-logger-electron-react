@@ -1,13 +1,25 @@
 'use strict'
-
-// Import parts of electron to use
-const { app, BrowserWindow } = require('electron')
+const { app, BrowserWindow,ipcMain } = require('electron')
 const path = require('path')
 const url = require('url')
-
+const connectDB = require("./config/db")
+const Log = require("./models/Log")
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
+
+//! COnnect to db
+connectDB()
+
+//!
+const getAllLogs = async() => {
+  try {
+    const logs = await Log.find().sort({created:-1})
+    mainWindow.webContents.send("load:logs",JSON.stringify(logs))
+  } catch (error) {
+    console.log(error)
+  }
+}
 
 // Keep a reference for dev mode
 let dev = false
@@ -88,6 +100,9 @@ function createWindow() {
 // Some APIs can only be used after this event occurs.
 app.on('ready', createWindow)
 
+//! GET REQUEST FROM RENDERER
+ipcMain.on("get:logs", getAllLogs)
+
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {
   // On macOS it is common for applications and their menu bar
@@ -105,4 +120,4 @@ app.on('activate', () => {
   }
 })
 
-//mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&ssl=false
+

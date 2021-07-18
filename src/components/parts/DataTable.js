@@ -1,4 +1,4 @@
-import React from "react";
+import React,{useEffect} from "react";
 import { MainContainer } from "./styles";
 import { makeStyles } from "@material-ui/core/styles";
 import Table from "@material-ui/core/Table";
@@ -8,18 +8,23 @@ import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
-import PriorityColor from './PriorityColor';
+import PriorityColor from "./PriorityColor";
+import CircularProgress from '@material-ui/core/CircularProgress';
 import { Button } from "@material-ui/core";
-import {DeleteForever} from '@material-ui/icons';
-import {useSelector, useDispatch} from 'react-redux';
-import {deleteTableCell} from '../redux/actions/logAction';
+import { DeleteForever } from "@material-ui/icons";
+import { useSelector, useDispatch } from "react-redux";
+import { deleteTableCell, fetchLogs } from "../redux/actions/logAction";
 
 const useStyles = makeStyles({
   tableHead: {
     fontWeight: "bold",
   },
-  tableContainer : {
-    boxShadow: "-4px 0px 15px -4px #888"
+  tableContainer: {
+    boxShadow: "-4px 0px 15px -4px #888",
+  },
+  spinner : {
+    textAlign:"center",
+    marginTop:"4rem"
   }
   // table: {
   //   minWidth: 650,
@@ -52,15 +57,30 @@ const useStyles = makeStyles({
 
 const DataTable = () => {
   const classes = useStyles();
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
 
-  const logs = useSelector(state => state.logs.logs)
+  const logs = useSelector((state) => state.logs.logs);
+  const loading = useSelector(state => state.logs.tableLoading)
+
+  useEffect(() => {
+    if(loading) {
+      dispatch(fetchLogs())
+    }
+  },[])
 
   const deleteCell = (id) => {
-   // console.log(id);
-    dispatch(deleteTableCell(id))
-  }
-  console.log(logs)
+    // console.log(id);
+    dispatch(deleteTableCell(id));
+  };
+
+console.log(loading);
+if (loading) {
+  return (
+    <div className={classes.spinner}>
+    <CircularProgress />
+    </div>
+  )
+}
   return (
     <MainContainer>
       <TableContainer component={Paper} className={classes.tableContainer}>
@@ -85,11 +105,19 @@ const DataTable = () => {
           <TableBody>
             {logs.map((item) => (
               <TableRow key={item.id}>
-                <PriorityColor level={item.priority}/>
+                <PriorityColor level={item.priority} />
                 <TableCell align="right">{item.text}</TableCell>
                 <TableCell align="right">{item.user}</TableCell>
                 <TableCell align="right">{item.created}</TableCell>
-                <TableCell align="right"><Button variant="contained" color="secondary" onClick={() => deleteCell(item.id)}><DeleteForever/></Button></TableCell>
+                <TableCell align="right">
+                  <Button
+                    variant="contained"
+                    color="secondary"
+                    onClick={() => deleteCell(item.id)}
+                  >
+                    <DeleteForever />
+                  </Button>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
