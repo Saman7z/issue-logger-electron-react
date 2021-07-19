@@ -1,4 +1,8 @@
+# Issue Logger Desktop APP created using Electron JS And React JS
 
+![HomeScreen](./src/assets/sc.png)
+
+### Saman-Ghanbari.com
 
  Install dependencies
 
