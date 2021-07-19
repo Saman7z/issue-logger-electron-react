@@ -1,15 +1,22 @@
-import { ADD_LOG,REMOVE_LOG, LOAD_LOGS } from "../types";
+import { ADD_LOG,REMOVE_LOG, LOAD_LOGS,DELETE_ALL_LOGS } from "../types";
 import {ipcRenderer} from 'electron';
 
 //! Add Log
 export const addLog = (data) => (dispatch) => {
-  //  console.log(newIssue, user, priority);
-dispatch({ type: ADD_LOG, payload: {id:Math.floor(Math.random()*100+1),text:data.newIssue,priority:data.priority,user:data.user,created:new Date().toString()} });
+  dispatch({type:ADD_LOG,payload:data})
 };
 
 //! Delete cEll
 export const deleteTableCell = (id) => dispatch => {
-  dispatch({type:REMOVE_LOG,payload:id})
+  try {
+    ipcRenderer.send("delete:log",id)
+    ipcRenderer.on("deleted:log",(e,log) => {
+      dispatch({type:REMOVE_LOG,payload:JSON.parse(log)})
+    })
+  } catch (error) {
+    console.log(error);
+  }
+
 }
 
 //! FETCH LOGS
@@ -22,4 +29,10 @@ export const fetchLogs = () => dispatch => {
   } catch (error) {
     console.log(error);
   }
+}
+
+//! Delete all logs
+export const deleteAllLogs = () => dispatch => {
+  console.log("delete all logs triggerdd");
+  dispatch({type:DELETE_ALL_LOGS})
 }

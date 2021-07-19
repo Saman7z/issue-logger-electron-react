@@ -1,4 +1,4 @@
-import React,{useEffect} from "react";
+import React, { useEffect } from "react";
 import { MainContainer } from "./styles";
 import { makeStyles } from "@material-ui/core/styles";
 import Table from "@material-ui/core/Table";
@@ -9,11 +9,16 @@ import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
 import PriorityColor from "./PriorityColor";
-import CircularProgress from '@material-ui/core/CircularProgress';
+import CircularProgress from "@material-ui/core/CircularProgress";
 import { Button } from "@material-ui/core";
 import { DeleteForever } from "@material-ui/icons";
 import { useSelector, useDispatch } from "react-redux";
-import { deleteTableCell, fetchLogs } from "../redux/actions/logAction";
+import {
+  deleteTableCell,
+  fetchLogs,
+  deleteAllLogs,
+} from "../redux/actions/logAction";
+import { ipcRenderer } from "electron";
 
 const useStyles = makeStyles({
   tableHead: {
@@ -22,10 +27,10 @@ const useStyles = makeStyles({
   tableContainer: {
     boxShadow: "-4px 0px 15px -4px #888",
   },
-  spinner : {
-    textAlign:"center",
-    marginTop:"4rem"
-  }
+  spinner: {
+    textAlign: "center",
+    marginTop: "4rem",
+  },
   // table: {
   //   minWidth: 650,
   // },
@@ -60,27 +65,27 @@ const DataTable = () => {
   const dispatch = useDispatch();
 
   const logs = useSelector((state) => state.logs.logs);
-  const loading = useSelector(state => state.logs.tableLoading)
+  const loading = useSelector((state) => state.logs.tableLoading);
 
   useEffect(() => {
-    if(loading) {
-      dispatch(fetchLogs())
+    if (loading) {
+      dispatch(fetchLogs());
     }
-  },[])
+  }, []);
+  ipcRenderer.on("clear:logs", () => dispatch(deleteAllLogs()));
 
   const deleteCell = (id) => {
     // console.log(id);
     dispatch(deleteTableCell(id));
   };
 
-console.log(loading);
-if (loading) {
-  return (
-    <div className={classes.spinner}>
-    <CircularProgress />
-    </div>
-  )
-}
+  if (loading) {
+    return (
+      <div className={classes.spinner}>
+        <CircularProgress />
+      </div>
+    );
+  }
   return (
     <MainContainer>
       <TableContainer component={Paper} className={classes.tableContainer}>
@@ -104,7 +109,7 @@ if (loading) {
           </TableHead>
           <TableBody>
             {logs.map((item) => (
-              <TableRow key={item.id}>
+              <TableRow key={item._id}>
                 <PriorityColor level={item.priority} />
                 <TableCell align="right">{item.text}</TableCell>
                 <TableCell align="right">{item.user}</TableCell>
@@ -113,7 +118,7 @@ if (loading) {
                   <Button
                     variant="contained"
                     color="secondary"
-                    onClick={() => deleteCell(item.id)}
+                    onClick={() => deleteCell(item._id)}
                   >
                     <DeleteForever />
                   </Button>

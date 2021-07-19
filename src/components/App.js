@@ -1,14 +1,22 @@
-import React from 'react'
-import AddLogs from './parts/AddLogs';
-import DataTable from './parts/DataTable';
-
+import React, { useEffect } from "react";
+import AddLogs from "./parts/AddLogs";
+import DataTable from "./parts/DataTable";
+import {useDispatch} from 'react-redux';
+import { ipcRenderer } from "electron";
+import { addLog } from "../components/redux/actions/logAction";
 const App = () => {
-	return (
-		<div className='app'>
-				<AddLogs />
-				<DataTable/>
-		</div>
-	)
-}
+  const dispatch = useDispatch();
+  useEffect(() => {
+    ipcRenderer.on("new:log", (e, log) => {
+      dispatch(addLog(JSON.parse(log)));
+    });
+  }, []);
+  return (
+    <div className="app">
+      <AddLogs />
+      <DataTable />
+    </div>
+  );
+};
 
-export default App
+export default App;
